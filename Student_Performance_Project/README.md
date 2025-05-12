@@ -7,12 +7,6 @@
 * student-performance-analysis.Rmd: Full analysis in R Markdown.
 * data/student_performance.csv: Cleaned dataset used for modeling.
 * info_dataset.pdf: Detailed information about the dataset columns and their descriptions.
-* linear_regression_theory.pdf: Theory behind Linear Regression.
-* svm_theory.pdf: Theory behind Support Vector Machine (SVM).
-* knn_theory.pdf: Theory behind K-Nearest Neighbors (KNN).
-* decision_tree_theory.pdf: Theory behind Decision Trees (DT).
-* random_tree_theory.pdf: Theory behind Random Trees (RT).
-* xgboost_theory.pdf: Theory behind XGBoost.
 
 ## 📂 Dataset Information
 * The dataset used in this project contains various features related to student demographics, school performance, and personal characteristics. For a detailed description of each column and its values, please refer to the info_dataset.pdf file.
