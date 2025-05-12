@@ -1,0 +1,464 @@
+---
+title: "Student_Performance"
+author: "Suyog_Timalsina"
+date: "2025-05-11"
+output: html_document
+---
+
+Student Performance
+
+Dataset link
+
+link = https://archive.ics.uci.edu/dataset/320/student+performance
+
+# About The Data
+
+The datasets student-mat.csv and student-por.csv contain information about students enrolled in Math and Portuguese language courses. The datasets include various attributes related to student demographics, academic background, and social factors.
+
+Key attributes include:
+
+School: The student's school ("GP" for Gabriel Pereira, "MS" for Mousinho da Silveira).
+
+Sex: Gender ("F" for female, "M" for male).
+
+Age: Age (numeric, 15–22).
+
+Family Background: Attributes like family size, parents' education, and cohabitation status.
+
+Parental Jobs: Occupation of the mother and father.
+
+Study and Activity Attributes: Study time, extracurricular activities, school attendance, and romantic relationships.
+
+Health & Social Behaviors: Alcohol consumption, health status, family relationships, and free time.
+
+Grades: G1, G2, and G3 represent the first period, second period, and final grades (numeric, from 0 to 20).
+
+# Installing needed packages
+```{r}
+# install.packages("ucimlrepo")
+# install.packages("dplyr")
+# install.packages("mlbench")
+# install.packages("fastDummies")
+# install.packages("caret")
+```
+
+# Fetching the dataset from the `UCI`
+```{r warning=FALSE , message=FALSE}
+library(ucimlrepo)
+library(dplyr)
+library(mlbench)
+
+# Fetching dataset with ID 320(student Performance dataset)
+student_performance <- fetch_ucirepo(id = 320)
+
+# Accessing the feature(X) and target(Y)
+X <- student_performance$data$features
+Y <- student_performance$data$targets
+
+# combining both dataset
+data <- cbind(X,Y)
+head(data)
+
+# Looking into data
+str(data)
+
+# Looking if their is any missing value
+sum(is.na(data))
+```
+
+# Converting some column into Factor
+```{r}
+library(dplyr)
+
+data <- data %>%
+  mutate(across(c(school, sex, famsize, Pstatus, Mjob, Fjob, reason, guardian, schoolsup, famsup, paid, activities, nursery, higher, internet, romantic), as.factor))
+
+str(data)
+```
+
+# Statistical Analysis
+### Correlation Analysis
+```{r}
+library(dplyr)
+
+corr_matrix <- data %>%
+  select(age, Medu, Fedu, traveltime, failures, studytime,
+         famrel, freetime, goout, Dalc, Walc, health, absences,
+         G1, G2, G3) %>%
+  cor()
+
+# Show only the correlation of each variable with G3
+corr_with_G3 <- corr_matrix[, "G3"]
+print(corr_with_G3)
+```
+* Strong Positive Coorelations : G1 , G2 meaning students who perform well early in the course are highly likely to maintain their performance
+* Moderate Positive Influences : Studytime , Mother's Education , Father's Education meaning students with more study and more educated parents tends to perform better.
+* Moderate to Strong Negative Correlation : Past Failures meaning students who have failed before are significantly more likely to have lower final grades.
+* Week Negative Influences : Age , Travel Time , Dalc , Walc , Freetime. Health , Absences , Going out meaning they show a slight negative relationship
+```{r corrplot, echo=FALSE, fig.width=10, fig.height=8, out.width="80%"}
+library(corrplot)
+
+corrplot(corr_matrix, 
+         method = "color", 
+         type = "upper", 
+         addCoef.col = "black", 
+         tl.col = "black", 
+         tl.srt = 45,  # Rotate the labels by 45 degrees
+         tl.cex = 0.8, # Adjust text label size
+         mar = c(0,0,2,0) # Increase the margin space for better readability
+)
+```
+
+# P-value Interpretation Statistical Significance
+
+* p ≤ 0.05 The result is statistically significant ✅ Yes
+
+* p > 0.05 The result is not statistically significant ❌ No
+
+# **ANOVA Analysis**
+* **From Analysis: School,Mjob,Fjob,reason,higher,interet,romatic have significant difference**
+```{r}
+# Analysis of G3 and School
+summary(aov(G3 ~ school, data = data))
+
+# Analysis of G3 and famsize
+summary(aov(G3 ~ famsize , data = data))
+
+# Analysis of G3 and famsize
+summary(aov(G3 ~ Pstatus , data = data))
+
+# Analysis of G3 and sex
+summary(aov(G3 ~ sex, data = data))
+
+# Analysis of G3 and Mjob
+summary(aov(G3 ~ Mjob , data = data))
+
+# Analysis of G3 and Fjob
+summary(aov(G3 ~ Fjob , data = data))
+
+# Analysis of G3 and reason
+summary(aov(G3 ~ reason , data = data))
+
+# Analysis of G3 and schoolsup
+summary(aov(G3 ~ schoolsup , data = data))
+
+# Analysis of G3 and fampsu
+summary(aov(G3 ~ famsup , data = data))
+
+# Analysis of G3 and paid
+summary(aov(G3 ~ paid, data = data))
+
+# Analysis of G3 and activities
+summary(aov(G3 ~ activities , data = data))
+
+# Analysis of G3 and nursery
+summary(aov(G3 ~ nursery , data = data))
+
+# Analysis of G3 and higher
+summary(aov(G3 ~ higher , data = data))
+
+# Analysis of G3 and internet
+summary(aov(G3 ~ internet , data = data))
+
+# Analysis of G3 and romantic
+summary(aov(G3 ~ romantic , data = data))
+```
+
+# Visualizing the Significant columns
+```{r}
+library(ggplot2)
+
+ggplot(data , aes(x= school , y = G3 , fill = school)) +
+  geom_boxplot()
+
+ggplot(data , aes(x= sex , y = G3 , fill = sex)) +
+  geom_boxplot()
+
+ggplot(data , aes(x= Mjob , y = G3 , fill = Mjob)) +
+  geom_boxplot()
+
+ggplot(data , aes(x= Fjob , y = G3 , fill = Fjob)) +
+  geom_boxplot()
+
+ggplot(data , aes(x= reason , y = G3 , fill = reason)) +
+  geom_boxplot()
+
+ggplot(data , aes(x= higher , y = G3 , fill = higher)) +
+  geom_boxplot()
+
+ggplot(data , aes(x= internet , y = G3 , fill = internet)) +
+  geom_boxplot()
+
+ggplot(data , aes(x= romantic , y = G3 , fill = romantic)) +
+  geom_boxplot()
+```
+
+# One-hot Encoding
+* as internet, higher, romantic are nomial data we use one-hot encoding
+```{r}
+library(fastDummies)
+library(dplyr)
+
+encoded_data <- dummy_cols(data , select_columns = c("internet","higher","romantic"),remove_selected_columns = TRUE,remove_first_dummy = TRUE)
+colnames(encoded_data)
+
+encoded_data <- encoded_data %>%
+  select(-famsize,-Pstatus,-schoolsup,-famsup,-paid,-activities,-nursery)
+
+```
+
+# Splitting Data into training 80% and testing 20%
+```{r}
+library(caret)
+set.seed(123)
+
+# Data into 80% and 20%
+split <- createDataPartition(encoded_data$G3 , p = 0.8 , list = FALSE)
+
+train_data <- encoded_data[split, ]
+test_data <- encoded_data[-split, ]
+```
+
+# Checking the Assumption of Linear Regression Model
+* Residual are approximately normal
+```{r , fig.width=20, fig.height=20}
+model <- lm(G3 ~ ., data = train_data)
+residuals <- resid(model)
+
+# Histogram of residuals
+hist(residuals)
+
+# Q-Q plot for normality
+qqnorm(residuals)
+qqline(residuals)
+```
+
+# Training Linear Regression Model
+```{r}
+LM_Model <- train(
+  G3 ~ . ,
+  data = train_data,
+  method = "lm"
+)
+
+summary(LM_Model)
+
+predictions <- predict(LM_Model , newdata = test_data)
+actuals <- test_data$G3
+postResample(pred = predictions, obs = actuals)
+
+
+# Plotting Actual vs Predicted
+plot(test_data$G3 , predictions,
+     xlab = "Actual G3",
+     ylab = "Predicted G3",
+     main = "Actual vs Predicted Linear Regression",
+     pch = 19, col = "blue")
+abline(0, 1, col = "red")  # reference line)
+```
+
+# Using Cross-Validation with Elastic Net Regression
+```{r}
+train_control <- trainControl(
+  method = "cv",
+  number = 10,
+)
+
+GLM_Model <- train(
+  G3 ~ . ,
+  data = train_data,
+  method = "glmnet",
+  trControl = train_control,
+  metric = c("RMSE")
+)
+print(GLM_Model)
+
+# Access final results
+best_model_results <- GLM_Model$results[
+  GLM_Model$results$alpha == GLM_Model$bestTune$alpha &
+  GLM_Model$results$lambda == GLM_Model$bestTune$lambda,
+]
+
+# Print RMSE, R-squared, and MAE
+cat("Best RMSE:", best_model_results$RMSE, "\n")
+cat("Best R-squared:", best_model_results$Rsquared, "\n")
+cat("Best MAE:", best_model_results$MAE, "\n")
+
+predictions_GLM <- predict(GLM_Model , newdata = test_data)
+actuals_GLM <- test_data$G3
+postResample(pred = predictions_GLM, obs = actuals_GLM)
+
+
+# Plotting Actual vs Predicted
+plot(test_data$G3 , predictions_GLM,
+     xlab = "Actual G3",
+     ylab = "Predicted G3",
+     main = "Actual vs Predicted GLMNET",
+     pch = 19, col = "blue")
+abline(0, 1, col = "red")  # reference line)
+```
+
+# Using Support Vector Machine
+* Since Linear Perform better so instead of Radial so we use Linear SVM
+```{r warning=FALSE, message=FALSE}
+library(e1071)
+library(quantmod)
+library(kernlab)
+
+svm_model <- train(G3 ~ . ,
+                   data = train_data,
+                   method = "svmRadial",
+                   trControl = train_control,
+                   preProcess = c("center","scale"),
+                   tuneLength = 5)
+
+svm_linear <- train(G3 ~ . ,
+                   data = train_data,
+                   method = "svmLinear",
+                   trControl = train_control,
+                   preProcess = c("center","scale"),
+                   tuneLength = 5)
+
+print(svm_model)
+
+#Best Model
+print(svm_linear)
+
+# Predict on test data
+pred_svm <- predict(svm_linear, newdata = test_data)
+actual_svm <- test_data$G3
+postResample(pred = pred_svm, obs = actual_svm)
+
+# Ploting Actual vs Predicted
+plot(test_data$G3 , pred_svm,
+     xlab = "Actual Point",
+     ylab = "Predicited Point",
+     main = "Actual vs Predicted SVM",
+     pch = 19, col = "blue")
+abline(0, 1, col = "red")
+
+```
+
+# Using K-Nearest Neighbour
+```{r}
+knn_model <- train(
+  G3~ .,
+  data = train_data,
+  method = "knn",
+  trControl = train_control,
+  preProcess = c("center","scale"),
+  tuneLength = 10 # k = 1 to 10
+)
+
+print(knn_model)
+plot(knn_model)
+
+# prediction
+pred_knn <- predict(knn_model, newdata = test_data)
+actual_knn <- test_data$G3
+
+postResample(pred = pred_knn, obs = actual_knn)
+
+# Plotting Actual vs Predicted Point
+plot(actual_knn , pred_knn,
+     xlab = "Actual Point",
+     ylab = "Predicted Point",
+     main = "Actual vs Predicted KNN",
+     pch = 19, col = "blue")
+abline(0, 1, col = "red")
+```
+
+# Using Decision Tree Model
+```{r}
+library(rpart)
+library(rpart.plot)
+library(caret)
+
+DT_model <- train(G3 ~ .,
+                  data = train_data,
+                  method = "rpart",
+                  trControl = train_control,
+                  preProcess = c("center","scale"),
+                  tuneLength = 10)
+print(DT_model)
+rpart.plot(DT_model$finalModel)
+
+# prediction
+pred_DT <- predict(DT_model, newdata = test_data)
+actual_DT <- test_data$G3
+
+postResample(pred = pred_DT, obs = actual_DT)
+
+# Plotting Actual vs Predicted
+plot(actual_DT , pred_DT,
+     xlab = "Actual Point",
+     ylab = "Predicted Point",
+     main = "Actual vs Predicted DT",
+     pch = 19, col = "blue")
+abline(0, 1, col = "red")
+```
+
+# Using Random Forest Model
+```{r message=FALSE , warning=FALSE}
+library(randomForest)
+
+RF_model <- train(G3~ . ,
+                  data = train_data,
+                  method = "rf",
+                  trControl = train_control,
+                  preProcess = c("center","scale"),
+                  tuneLength = 5)
+print(RF_model)
+plot(RF_model)
+
+# prediction
+pred_RF <- predict(RF_model , newdata = test_data)
+actual_RF <- test_data$G3
+postResample(pred = pred_RF , obs = actual_RF)
+
+# Plotting Actual vs Predicted
+plot(actual_RF , pred_RF,
+     xlab = "Actual Point",
+     ylab = "Predicted Point",
+     main = "Actual vs Predicted RF",
+     pch = 19, col = "blue")
+abline(0, 1, col = "red")
+```
+
+# Using XGBoost Model
+```{r message=FALSE, warning=FALSE,results='hide'}
+XGB_model <- train(
+    G3 ~ . , 
+    data = train_data,
+    method = "xgbTree",
+    trControl = train_control,
+    preProcess = c("center","scale"),
+    tuneLength = 5
+)
+```
+
+```{r}
+# Extract the best training performance
+best_metrics <- XGB_model$results[
+  XGB_model$results$nrounds == XGB_model$bestTune$nrounds &
+  XGB_model$results$max_depth == XGB_model$bestTune$max_depth &
+  XGB_model$results$eta == XGB_model$bestTune$eta &
+  XGB_model$results$gamma == XGB_model$bestTune$gamma &
+  XGB_model$results$colsample_bytree == XGB_model$bestTune$colsample_bytree &
+  XGB_model$results$min_child_weight == XGB_model$bestTune$min_child_weight &
+  XGB_model$results$subsample == XGB_model$bestTune$subsample,
+]
+
+print(best_metrics)
+
+# View the best tuning parameters
+XGB_model$bestTune
+
+plot(XGB_model)
+
+# prediction
+pred_XGB <- predict(XGB_model , newdata = test_data)
+actual_XGB <- test_data$G3
+postResample(pred = pred_XGB , obs = actual_XGB)
+```
+
