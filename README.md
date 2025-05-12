@@ -7,12 +7,7 @@
 * student-performance-analysis.Rmd: Full analysis in R Markdown.
 * data/student_performance.csv: Cleaned dataset used for modeling.
 * info_dataset.pdf: Detailed information about the dataset columns and their descriptions.
-* linear_regression_theory.pdf: Theory behind Linear Regression.
-* svm_theory.pdf: Theory behind Support Vector Machine (SVM).
-* knn_theory.pdf: Theory behind K-Nearest Neighbors (KNN).
-* decision_tree_theory.pdf: Theory behind Decision Trees (DT).
-* random_tree_theory.pdf: Theory behind Random Trees (RT).
-* xgboost_theory.pdf: Theory behind XGBoost.
+
 
 ## 📂 Dataset Information
 * The dataset used in this project contains various features related to student demographics, school performance, and personal characteristics. The primary dataset is sourced from the UCI Machine Learning Repository.
@@ -24,6 +19,26 @@
 * Install.packages libraries <- c("ucimlrepo", "dplyr", "mlbench", "fastDummies", "caret", "corrplot", "ggplot2", "e1071", "quantmod", "kernlab", "rpart", "rpart.plot", "randomForest")
 * Knit the R Markdown file to generate the output with code, visualizations, and results.
 
+# ⚙️ Data Preprocessing & Modeling Workflow
+## 🔧 Preprocessing Steps
+* One-Hot Encoding was applied to categorical variables such as **internet,higher,romantic**, using the fastDummies package. This ensured that the machine learning models could process these non-numeric features appropriately.
+* Irrelevant or identifier columns like **famsize,pstatus,schoolsup,famsup,paid,activities and nursery**  were dropped to reduce noise and prevent data leakage.
+* Data was split into training and test sets using an 80/20 split for model validation.
+
+## 🔁 Cross-Validation
+* To prevent overfitting and ensure robust performance metrics, 10-fold Cross-Validation was used with the caret package. This was applied during model training to evaluate performance across multiple data subsets.
+* The training process used consistent preprocessing (e.g., centering, scaling) inside cross-validation pipelines.
+
+## 🤖 Model Training
+* Multiple regression models were trained, including:
+* Linear Regression
+* GLMNet (Lasso and Ridge)
+* Support Vector Machine (SVM)
+* K-Nearest Neighbors (KNN)
+* Decision Tree
+* Random Forest
+* XGBoost
+* Performance was compared using standard metrics: RMSE, R², and MAE on both training and testing datasets.
 # 📊 Model Performance
 
 | Model              | Train RMSE | Train R² | Train MAE | Test RMSE | Test R² | Test MAE |
